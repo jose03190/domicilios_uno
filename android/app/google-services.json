@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "260873511667",
+    "project_id": "domidata-bbf33",
+    "storage_bucket": "domidata-bbf33.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:260873511667:android:aec5c81707f9b3f462cd86",
+        "android_client_info": {
+          "package_name": "com.example.domicilios_uno"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBcDBq9VOAkeVe9kAC0XYDM3UeLleuHJ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
