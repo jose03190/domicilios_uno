@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'userregistrationscreen.dart';
 import '../delivery/delivery_home.dart';
 import '../delivery/delivery_registration.dart';
+import '../business/businesscard.dart';
 
 class OTPScreen extends StatefulWidget {
   final String verificationId;
@@ -47,7 +48,7 @@ class _OTPScreenState extends State<OTPScreen> {
         final phone = user.phoneNumber;
         final uid = user.uid;
 
-        /// ✅ Buscar el teléfono exactamente como lo guardaste: "telefono" sin tilde
+        // Verificar si es repartidor
         final repartidorDoc =
             await _firestore
                 .collection('repartidores')
@@ -59,13 +60,11 @@ class _OTPScreenState extends State<OTPScreen> {
           final doc = repartidorDoc.docs.first;
           final data = doc.data();
 
-          // Si no tiene UID, lo agregamos
           if (data['uid'] == null || data['uid'].toString().isEmpty) {
             await doc.reference.update({'uid': uid});
             data['uid'] = uid;
           }
 
-          // Si ya tiene nombre y zona → lo llevamos al home
           if (data.containsKey('nombre') &&
               data.containsKey('zona') &&
               data['nombre'] != null &&
@@ -75,25 +74,31 @@ class _OTPScreenState extends State<OTPScreen> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => DeliveryHome(repartidorData: data),
+                builder: (_) => DeliveryHome(repartidorData: data),
               ),
             );
           } else {
-            // Aún no ha completado sus datos
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => const DeliveryRegistrationScreen(),
+                builder: (_) => const DeliveryRegistrationScreen(),
               ),
             );
           }
-        } else {
-          // No está en repartidores → es un usuario normal
+          return;
+        }
+
+        // Si no es repartidor, buscar si ya existe en la colección users
+        final userDoc = await _firestore.collection('users').doc(uid).get();
+        if (userDoc.exists) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-              builder: (context) => const UserRegistrationScreen(),
-            ),
+            MaterialPageRoute(builder: (_) => const BusinessCard()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const UserRegistrationScreen()),
           );
         }
       }

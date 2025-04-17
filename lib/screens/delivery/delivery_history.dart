@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'delivery_order_detail_view.dart'; // Asegúrate de crear esta pantalla
+import 'package:intl/intl.dart';
+import 'delivery_order_detail_view.dart';
 
 class DeliveryHistory extends StatelessWidget {
   final String uid;
@@ -24,6 +25,7 @@ class DeliveryHistory extends StatelessWidget {
                 .collection('pedidos')
                 .where('repartidorId', isEqualTo: uid)
                 .where('estado', isEqualTo: 'entregado')
+                .orderBy('timestamp', descending: true)
                 .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
@@ -49,16 +51,24 @@ class DeliveryHistory extends StatelessWidget {
               final cliente = pedido['cliente'] ?? 'Cliente';
               final direccion = pedido['direccion'] ?? 'Sin dirección';
               final total = pedido['total'] ?? 0;
+              final fecha =
+                  pedido['timestamp'] != null
+                      ? DateFormat(
+                        'dd/MM/yyyy HH:mm',
+                      ).format((pedido['timestamp'] as Timestamp).toDate())
+                      : 'Sin fecha';
 
               return Card(
                 margin: const EdgeInsets.all(10),
                 elevation: 3,
                 child: ListTile(
+                  leading: const Icon(Icons.check_circle, color: Colors.green),
                   title: Text('Cliente: $cliente'),
                   subtitle: Text(
-                    'Dirección: $direccion\nTotal: \$${total.toInt()}',
+                    'Dirección: $direccion\nTotal: \$${total.toInt()}\nFecha: $fecha',
                   ),
-                  trailing: ElevatedButton(
+                  trailing: IconButton(
+                    icon: const Icon(Icons.arrow_forward_ios),
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -69,10 +79,6 @@ class DeliveryHistory extends StatelessWidget {
                         ),
                       );
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                    ),
-                    child: const Text('Ver Detalles'),
                   ),
                 ),
               );
