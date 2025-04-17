@@ -2,6 +2,7 @@ import 'package:domicilios_uno/screens/auth/UserProfileScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:domicilios_uno/screens/business/businesscardhome.dart';
 import 'package:domicilios_uno/screens/business/carritoscreen.dart';
+import 'package:domicilios_uno/screens/business/user_orders_screen.dart';
 
 class BusinessCard extends StatefulWidget {
   const BusinessCard({super.key});
@@ -14,9 +15,10 @@ class _BusinessCardState extends State<BusinessCard> {
   int _selectedIndex = 1;
 
   final List<Widget> _screens = [
-    const UserProfileScreen(), // Perfil
-    const BusinessCardHome(), // Inicio (Negocios)
-    const CarritoScreen(), // Carrito
+    const UserProfileScreen(), // 0 - Perfil
+    const BusinessCardHome(), // 1 - Inicio (Negocios)
+    const CarritoScreen(), // 2 - Carrito
+    const UserOrdersScreen(), // 3 - Mis pedidos
   ];
 
   void _onItemTapped(int index) {
@@ -37,9 +39,11 @@ class _BusinessCardState extends State<BusinessCard> {
             icon: Icon(Icons.shopping_cart),
             label: 'Carrito',
           ),
+          BottomNavigationBarItem(icon: Icon(Icons.receipt), label: 'Pedidos'),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.green,
+        unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
       ),
     );
