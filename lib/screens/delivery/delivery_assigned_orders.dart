@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'delivery_order_detail_view.dart';
 
 class DeliveryAssignedOrders extends StatelessWidget {
   final String uid;
@@ -50,7 +49,6 @@ class DeliveryAssignedOrders extends StatelessWidget {
                 .collection('pedidos')
                 .where('repartidorId', isEqualTo: uid)
                 .where('estado', whereIn: ['preparando', 'en ruta'])
-                .orderBy('timestamp', descending: true)
                 .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
@@ -92,76 +90,44 @@ class DeliveryAssignedOrders extends StatelessWidget {
               return Card(
                 margin: const EdgeInsets.all(10),
                 elevation: 4,
-                child: Column(
-                  children: [
-                    ListTile(
-                      leading: _getEstadoIcon(estado),
-                      title: Text(
-                        _getEstadoTexto(estado),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(
-                        'Cliente: $cliente\nDirección: $direccion\nTotal: \$${total.toInt()}',
-                      ),
-                      isThreeLine: true,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (_) => DeliveryOrderDetailView(
-                                      pedidoId: pedido.id,
-                                    ),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.visibility),
-                          label: const Text('Ver detalles'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blueGrey,
-                          ),
-                        ),
-                        if (siguienteEstado.isNotEmpty)
-                          ElevatedButton.icon(
-                            onPressed: () async {
-                              try {
-                                await FirebaseFirestore.instance
-                                    .collection('pedidos')
-                                    .doc(pedido.id)
-                                    .update({'estado': siguienteEstado});
+                child: ListTile(
+                  leading: _getEstadoIcon(estado),
+                  title: Text(
+                    _getEstadoTexto(estado),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    'Cliente: $cliente\nDirección: $direccion\nTotal: \$${total.toInt()}',
+                  ),
+                  isThreeLine: true,
+                  trailing: ElevatedButton(
+                    onPressed: () async {
+                      try {
+                        await FirebaseFirestore.instance
+                            .collection('pedidos')
+                            .doc(pedido.id)
+                            .update({'estado': siguienteEstado});
 
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Pedido actualizado a: $siguienteEstado',
-                                    ),
-                                  ),
-                                );
-                              } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Error al actualizar estado: $e',
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
-                            icon: const Icon(Icons.update),
-                            label: Text(textoBoton),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Pedido actualizado a: $siguienteEstado',
                             ),
                           ),
-                      ],
+                        );
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Error al actualizar estado: $e'),
+                          ),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
                     ),
-                    const SizedBox(height: 10),
-                  ],
+                    child: Text(textoBoton),
+                  ),
                 ),
               );
             },

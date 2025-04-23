@@ -49,6 +49,14 @@ class UserOrdersScreen extends StatelessWidget {
     }
 
     final uid = user.uid;
+    print('🧩 UID autenticado: $uid');
+
+    // 🔍 Verificar qué UID tienen los pedidos guardados
+    FirebaseFirestore.instance.collection('pedidos').get().then((snapshot) {
+      for (var doc in snapshot.docs) {
+        print('📦 Pedido: ${doc.id} | UID almacenado: ${doc['uid']}');
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -60,7 +68,6 @@ class UserOrdersScreen extends StatelessWidget {
             FirebaseFirestore.instance
                 .collection('pedidos')
                 .where('uid', isEqualTo: uid)
-                .orderBy('timestamp', descending: true)
                 .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
@@ -81,19 +88,10 @@ class UserOrdersScreen extends StatelessWidget {
             itemCount: pedidos.length,
             itemBuilder: (context, index) {
               final pedido = pedidos[index];
+
               final estado = pedido['estado'] ?? 'pendiente de repartidor';
               final total = pedido['total'] ?? 0;
               final direccion = pedido['direccion'] ?? 'Sin dirección';
-
-              String fecha = 'Sin fecha';
-              try {
-                final timestamp = pedido['timestamp'] as Timestamp?;
-                if (timestamp != null) {
-                  fecha = timestamp.toDate().toString().substring(0, 16);
-                }
-              } catch (_) {
-                fecha = 'Sin fecha';
-              }
 
               return Card(
                 margin: const EdgeInsets.all(10),
@@ -105,7 +103,7 @@ class UserOrdersScreen extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
-                    'Dirección: $direccion\nTotal: \$${total.toInt()}\nFecha: $fecha',
+                    'Dirección: $direccion\nTotal: \$${total.toInt()}',
                   ),
                   trailing: IconButton(
                     icon: const Icon(Icons.arrow_forward_ios),

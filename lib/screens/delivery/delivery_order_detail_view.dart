@@ -9,10 +9,7 @@ class DeliveryOrderDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Detalle del Pedido'),
-        backgroundColor: Colors.green,
-      ),
+      appBar: AppBar(title: const Text('Detalle del Pedido')),
       body: FutureBuilder<DocumentSnapshot>(
         future:
             FirebaseFirestore.instance
@@ -21,7 +18,7 @@ class DeliveryOrderDetailView extends StatelessWidget {
                 .get(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(child: Text('❌ Error al cargar el pedido'));
+            return const Center(child: Text('Error al cargar el pedido'));
           }
 
           if (!snapshot.hasData || !snapshot.data!.exists) {
@@ -31,62 +28,33 @@ class DeliveryOrderDetailView extends StatelessWidget {
           final pedido = snapshot.data!;
           final cliente = pedido['cliente'] ?? 'Cliente';
           final direccion = pedido['direccion'] ?? 'Sin dirección';
-          final descripcion = pedido['descripcion'] ?? '';
-          final estado = pedido['estado'] ?? 'Sin estado';
           final total = pedido['total'] ?? 0;
-          final telefono = pedido['telefono'] ?? 'Sin número';
           final productos = List<Map<String, dynamic>>.from(
             pedido['productos'] ?? [],
           );
-
-          String fecha = 'Sin fecha';
-          try {
-            final timestamp = pedido['timestamp'] as Timestamp?;
-            if (timestamp != null) {
-              fecha = timestamp.toDate().toString().substring(0, 16);
-            }
-          } catch (_) {
-            fecha = 'Sin fecha';
-          }
 
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: ListView(
               children: [
                 Text('Cliente: $cliente', style: const TextStyle(fontSize: 18)),
-                Text('📍 Dirección: $direccion'),
-                if (descripcion.isNotEmpty)
-                  Text('📝 Descripción: $descripcion'),
-                const SizedBox(height: 8),
-                Text('📞 Teléfono: $telefono'),
-                Text('📅 Fecha: $fecha'),
-                const SizedBox(height: 12),
-                Text(
-                  'Estado: $estado',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue,
-                  ),
-                ),
-                const Divider(height: 30),
+                Text('Dirección: $direccion'),
+                const SizedBox(height: 16),
                 const Text(
                   'Productos:',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 6),
                 ...productos.map((producto) {
                   final nombre = producto['nombre'] ?? 'Producto';
                   final cantidad = producto['cantidad'] ?? 1;
-                  final restaurante = producto['restaurante'] ?? 'Restaurante';
-                  return Text('- $nombre x$cantidad ($restaurante)');
+                  return Text('- $nombre x$cantidad');
                 }),
-                const Divider(height: 30),
+                const SizedBox(height: 16),
                 Text(
                   'Total: \$${total.toInt()}',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
-                    color: Colors.green,
                   ),
                 ),
               ],
