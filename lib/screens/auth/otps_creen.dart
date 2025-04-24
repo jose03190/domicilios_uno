@@ -48,7 +48,6 @@ class _OTPScreenState extends State<OTPScreen> {
         final phone = user.phoneNumber;
         final uid = user.uid;
 
-        // Verificar si es repartidor
         final repartidorDoc =
             await _firestore
                 .collection('repartidores')
@@ -88,7 +87,6 @@ class _OTPScreenState extends State<OTPScreen> {
           return;
         }
 
-        // Si no es repartidor, buscar si ya existe en la colección users
         final userDoc = await _firestore.collection('users').doc(uid).get();
         if (userDoc.exists) {
           Navigator.pushReplacement(
@@ -119,37 +117,82 @@ class _OTPScreenState extends State<OTPScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Verificación OTP',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _otpController,
-              keyboardType: TextInputType.number,
-              textAlign: TextAlign.center,
-              maxLength: 6,
-              autofocus: true,
-              decoration: const InputDecoration(
-                labelText: 'Ingrese el código',
-                border: OutlineInputBorder(),
-              ),
-              onSubmitted: (_) => _verifyCode(),
-            ),
-            const SizedBox(height: 20),
-            _isLoading
-                ? const CircularProgressIndicator()
-                : ElevatedButton(
-                  onPressed: _verifyCode,
-                  child: const Text('Verificar'),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            'assets/images/otp.png', // Asegúrate que esté en assets/images/
+            fit: BoxFit.cover,
+          ),
+          Container(
+            // ignore: deprecated_member_use
+            color: Colors.black.withOpacity(
+              0.5,
+            ), // 🟢 Oscurece un poco la imagen
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Center(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Verificación OTP',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white, // ✅ Blanco para que contraste
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _otpController,
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      maxLength: 6,
+                      autofocus: true,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        labelText: 'Ingrese el código',
+                        labelStyle: const TextStyle(color: Colors.white),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.white),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: Colors.white),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onSubmitted: (_) => _verifyCode(),
+                    ),
+                    const SizedBox(height: 20),
+                    _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : ElevatedButton(
+                          onPressed: _verifyCode,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 50,
+                              vertical: 15,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text(
+                            'Verificar',
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                          ),
+                        ),
+                  ],
                 ),
-          ],
-        ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

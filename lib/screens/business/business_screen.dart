@@ -12,7 +12,7 @@ class BusinessScreen extends StatelessWidget {
     Widget businessPage = Center(
       child: Text(
         'Aquí se mostrará el menú de $businessName con productos y precios.',
-        style: const TextStyle(fontSize: 18),
+        style: const TextStyle(fontSize: 18, color: Colors.white),
         textAlign: TextAlign.center,
       ),
     );
@@ -21,18 +21,14 @@ class BusinessScreen extends StatelessWidget {
       case 'Parrilla Artesanal':
         businessPage = const ParrillaArtesanalScreen();
         break;
-      case 'Kike’s Pizza': // Aquí usamos la comilla curva, igual que en tu listado
+      case 'Kike’s Pizza':
         businessPage = const KikesPizzaScreen();
         break;
-      // Agrega más casos según necesites
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Menú de $businessName'),
-        backgroundColor: Colors.grey[900],
-      ),
-      body: businessPage,
+      backgroundColor: Colors.grey[850], // Fondo oscuro
+      body: businessPage, // ❌ Ya no hay AppBar aquí
     );
   }
 }

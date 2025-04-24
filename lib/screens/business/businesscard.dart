@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:domicilios_uno/screens/business/businesscardhome.dart';
 import 'package:domicilios_uno/screens/business/carritoscreen.dart';
 import 'package:domicilios_uno/screens/business/user_orders_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:domicilios_uno/screens/business/cart_provider.dart';
 
 class BusinessCard extends StatefulWidget {
   const BusinessCard({super.key});
@@ -29,17 +31,84 @@ class _BusinessCardState extends State<BusinessCard> {
 
   @override
   Widget build(BuildContext context) {
+    final cartProvider = Provider.of<CartProvider>(context);
+
     return Scaffold(
       body: _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
+        items: [
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Perfil',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Inicio',
+          ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
+            icon: Stack(
+              children: [
+                const Icon(Icons.shopping_cart),
+                if (cartProvider.totalItems > 0)
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 18,
+                        minHeight: 18,
+                      ),
+                      child: Text(
+                        '${cartProvider.totalItems}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
             label: 'Carrito',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.receipt), label: 'Pedidos'),
+          BottomNavigationBarItem(
+            icon: Stack(
+              children: [
+                const Icon(Icons.receipt),
+                if (cartProvider.pendingOrders > 0)
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 18,
+                        minHeight: 18,
+                      ),
+                      child: Text(
+                        '${cartProvider.pendingOrders}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            label: 'Pedidos',
+          ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.green,

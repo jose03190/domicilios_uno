@@ -18,6 +18,57 @@ class CarritoScreen extends StatelessWidget {
       return;
     }
 
+    // 🟠 Mostrar advertencia tipo factura
+    final confirmacion = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Confirmar pedido'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Detalle del pedido:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                ...carrito.map(
+                  (item) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Text(
+                      '${item.quantity} x ${item.productName} (\$${item.price} c/u) = \$${item.quantity * item.price}',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Total: \$${cartProvider.total}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+              child: const Text('Confirmar pedido'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmacion != true) {
+      return; // El usuario canceló la compra
+    }
+
+    // ✅ Guardar el pedido en Firestore
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(
@@ -41,7 +92,7 @@ class CarritoScreen extends StatelessWidget {
 
     final userData = userDoc.data()!;
     final pedido = {
-      'uid': user.uid, // ✅ Agregado
+      'uid': user.uid,
       'cliente': userData['name'],
       'telefono': user.phoneNumber,
       'direccion': userData['address'],
@@ -106,12 +157,54 @@ class CarritoScreen extends StatelessWidget {
                   itemCount: carrito.length,
                   itemBuilder: (context, index) {
                     final producto = carrito[index];
-                    return ListTile(
-                      title: Text(producto.productName),
-                      subtitle: Text(
-                        'Cantidad: ${producto.quantity} - Restaurante: ${producto.businessName}',
+                    return Card(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
                       ),
-                      trailing: Text('\$${producto.price * producto.quantity}'),
+                      child: ListTile(
+                        title: Text(producto.productName),
+                        subtitle: Text(
+                          'Cantidad: ${producto.quantity} - Restaurante: ${producto.businessName}',
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.remove),
+                              onPressed: () {
+                                if (producto.quantity > 1) {
+                                  cartProvider.updateQuantity(
+                                    producto,
+                                    producto.quantity - 1,
+                                  );
+                                } else {
+                                  cartProvider.removeItem(producto);
+                                }
+                              },
+                            ),
+                            Text(
+                              '${producto.quantity}',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.add),
+                              onPressed: () {
+                                cartProvider.updateQuantity(
+                                  producto,
+                                  producto.quantity + 1,
+                                );
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                cartProvider.removeItem(producto);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
                     );
                   },
                 ),

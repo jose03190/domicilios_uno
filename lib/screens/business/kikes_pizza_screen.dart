@@ -17,45 +17,124 @@ class _KikesPizzaScreenState extends State<KikesPizzaScreen> {
     {'nombre': 'Gaseosa 1.5L', 'precio': 7000},
   ];
 
-  void agregarAlCarrito(Map<String, dynamic> producto) {
-    // ✅ Ahora pasamos el nombre del negocio como argumento
-    Provider.of<CartProvider>(
-      context,
-      listen: false,
-    ).addToCart(producto, "Kike's Pizza");
+  final Map<int, int> cantidades = {};
+
+  void _agregarTodosAlCarrito(BuildContext context) {
+    final seleccionados =
+        productos.asMap().entries.where((entry) {
+          final cantidad = cantidades[entry.key] ?? 0;
+          return cantidad > 0;
+        }).toList();
+
+    if (seleccionados.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No has seleccionado productos')),
+      );
+      return;
+    }
+
+    final cartProvider = Provider.of<CartProvider>(context, listen: false);
+
+    for (var entry in seleccionados) {
+      final index = entry.key;
+      final producto = productos[index];
+      final cantidad = cantidades[index] ?? 0;
+
+      cartProvider.addToCart({
+        'nombre': producto['nombre'],
+        'precio': producto['precio'],
+        'cantidad': cantidad,
+      }, "Kike's Pizza");
+    }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${producto['nombre']} agregado al carrito')),
+      const SnackBar(content: Text('Productos agregados al carrito')),
     );
+
+    setState(() {
+      cantidades.clear();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Kike's Pizza"),
+        title: const Text(
+          "Kike's Pizza",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w800, // 👈 Borde más grueso
+            fontSize: 20, // 👈 Puedes ajustar el tamaño si quieres
+          ),
+        ),
+        iconTheme: const IconThemeData(
+          color: Colors.white, // 👈 Ícono de retroceso blanco
+        ),
         backgroundColor: Colors.redAccent,
       ),
-      body: ListView.builder(
-        itemCount: productos.length,
-        itemBuilder: (context, index) {
-          final producto = productos[index];
-          return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            child: ListTile(
-              title: Text(producto['nombre']),
-              subtitle: Text('\$${producto['precio']}'),
-              trailing: ElevatedButton(
-                onPressed: () => agregarAlCarrito(producto),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Agregar'),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: productos.length,
+              itemBuilder: (context, index) {
+                final producto = productos[index];
+                final cantidad = cantidades[index] ?? 0;
+
+                return Card(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  child: ListTile(
+                    title: Text(producto['nombre']),
+                    subtitle: Text('\$${producto['precio']}'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.remove),
+                          onPressed: () {
+                            setState(() {
+                              if (cantidad > 0) {
+                                cantidades[index] = cantidad - 1;
+                              }
+                            });
+                          },
+                        ),
+                        Text('$cantidad', style: const TextStyle(fontSize: 18)),
+                        IconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: () {
+                            setState(() {
+                              cantidades[index] = cantidad + 1;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: ElevatedButton.icon(
+              onPressed: () => _agregarTodosAlCarrito(context),
+              icon: const Icon(Icons.shopping_cart, color: Colors.white),
+              label: const Text(
+                'Agregar al carrito',
+                style: TextStyle(color: Colors.white),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                minimumSize: const Size(double.infinity, 50),
               ),
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }

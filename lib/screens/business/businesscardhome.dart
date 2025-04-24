@@ -18,8 +18,16 @@ class BusinessCardHome extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Negocios Aliados'),
-        backgroundColor: Colors.grey[900],
+        title: const Text(
+          'Negocios Aliados',
+          style: TextStyle(
+            color: Colors.white, // ✅ Blanco
+            fontWeight: FontWeight.bold, // ✅ Más grueso (bold)
+            fontSize: 22, // ✅ Un poco más grande para mejor visibilidad
+          ),
+        ),
+        backgroundColor: const Color.fromRGBO(76, 175, 80, 1),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -72,8 +80,8 @@ class _BusinessCardItem extends StatelessWidget {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
+                backgroundColor: const Color.fromRGBO(76, 175, 80, 1),
+                foregroundColor: const Color.fromRGBO(255, 255, 255, 1),
               ),
               child: const Text('Ver menú'),
             ),
